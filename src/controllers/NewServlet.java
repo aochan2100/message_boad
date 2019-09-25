@@ -1,7 +1,6 @@
 package controllers;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.servlet.RequestDispatcher;
@@ -15,16 +14,16 @@ import models.Message;
 import utils.DBUtil;
 
 /**
- * Servlet implementation class IndexServlet
+ * Servlet implementation class NewServlet
  */
-@WebServlet("/index")
-public class IndexServlet extends HttpServlet {
+@WebServlet("/New")
+public class NewServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public IndexServlet() {
+    public NewServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -34,17 +33,15 @@ public class IndexServlet extends HttpServlet {
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         EntityManager em = DBUtil.createEntityManager();
+        em.getTransaction().begin();
 
-        List<Message> messages = em.createNamedQuery("getAllMessages", Message.class)
-                .getResultList();
-        // TODO Auto-generated method stub
-        response.getWriter().append(Integer.valueOf(messages.size()).toString());
+        //CSRF対策
+        request.setAttribute("_token", request.getSession().getId());
 
-        em.close();
+        //おまじないとしてのインスタンスを生成
+        request.setAttribute("message", new Message());
 
-        request.setAttribute("messages", messages);
-
-        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/messages/index.jsp");
+        RequestDispatcher rd = request.getRequestDispatcher("WEB-INF/views/messages/new.jsp");
         rd.forward(request, response);
     }
 
